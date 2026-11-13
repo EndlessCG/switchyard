@@ -134,6 +134,7 @@ def _start(tmp_path, *extra, codex_bin=None):
     p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     p.stdin.write(COLLECTOR.read_text(encoding="utf-8"))  # exactly how the hub starts it
     p.stdin.close()
+    p.stdin = None  # sent and closed: communicate() on Python <= 3.12 would try to flush it
     return p
 
 
