@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Switchyard as a macOS LaunchAgent, which is where the hub belongs: it needs SSH to every
+     server, and your Mac is the machine that has it.
+
+     Replace YOU with your short user name and the node path with `which node`, then:
+
+       cp packaging/com.switchyard.hub.plist ~/Library/LaunchAgents/
+       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.switchyard.hub.plist
+       launchctl kickstart -p gui/$(id -u)/com.switchyard.hub      # check it is alive
+       tail -f ~/Library/Logs/switchyard.log
+
+     SSH is the part that bites: a LaunchAgent does not inherit your terminal's ssh-agent, so a
+     key with a passphrase will fail silently and every host will show offline. Either use a
+     passphrase-less key for these hosts, or store it in the keychain
+     (`ssh-add --apple-use-keychain ~/.ssh/id_ed25519`) and point ssh at the keychain agent with
+     `IdentityAgent "~/Library/Group Containers/com.apple.ssh.agent/Listeners"` in ~/.ssh/config.
+     Off the VPN the hub simply shows the hosts as offline and reconnects by itself. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.switchyard.hub</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/Users/YOU/switchyard/server.js</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/YOU/switchyard</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/Users/YOU/Library/Logs/switchyard.log</string>
+  <key>StandardErrorPath</key><string>/Users/YOU/Library/Logs/switchyard.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>
